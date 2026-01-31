@@ -19,7 +19,7 @@ import { useFormState } from "react-dom";
 import { toast } from "react-toastify";
 import { FormContainerProps } from "./FormContainer";
 
-const deleteActionMap = {
+const deleteActionMap: Record<string, any> = {
   subject: deleteSubject,
   class: deleteClass,
   teacher: deleteTeacher,

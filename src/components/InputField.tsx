@@ -6,7 +6,9 @@ type InputFieldProps = {
   register: any;
   name: string;
   defaultValue?: string;
-  error?: FieldError;
+  // errors from react-hook-form can be nested structures; allow any to avoid
+  // strict assignment errors where callers pass `errors?.field`.
+  error?: any;
   hidden?: boolean;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
 };

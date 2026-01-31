@@ -571,14 +571,14 @@ export const createExam = async (
       }
     }
 
-    await prisma.exam.create({
-      data: {
-        title: data.title,
-        startTime: start,
-        endTime: end,
-        ...(lessonId ? { lessonId } : {}),
-      },
-    });
+    const examData: any = {
+      title: data.title,
+      startTime: start,
+      endTime: end,
+    };
+    if (typeof lessonId !== "undefined") examData.lessonId = lessonId;
+
+    await prisma.exam.create({ data: examData });
 
     // revalidatePath("/list/subjects");
     return { success: true, error: false };

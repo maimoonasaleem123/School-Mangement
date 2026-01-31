@@ -143,7 +143,7 @@ const renderRow = (item: any) => {
             lesson: {
               select: {
                 class: { select: { name: true } },
-                teacher: { select: { name: true, surname: true } },
+                  teacher: { select: { id: true, name: true, surname: true } },
               },
             },
           },
@@ -153,7 +153,7 @@ const renderRow = (item: any) => {
             lesson: {
               select: {
                 class: { select: { name: true } },
-                teacher: { select: { name: true, surname: true } },
+                teacher: { select: { id: true, name: true, surname: true } },
               },
             },
           },

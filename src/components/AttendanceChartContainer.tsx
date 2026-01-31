@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import AttendanceChart from "./AttendanceChart";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 const AttendanceChartContainer = () => {
   const [data, setData] = useState<{ name: string; present: number; absent: number }[]>([
@@ -12,7 +12,7 @@ const AttendanceChartContainer = () => {
     { name: "Fri", present: 0, absent: 0 },
   ]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const res = await fetch("/api/attendance/week");
       if (res.ok) {
@@ -22,13 +22,13 @@ const AttendanceChartContainer = () => {
     } catch (e) {
       // ignore
     }
-  };
+  }, []);
 
   const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [totals, setTotals] = useState<{ present: number; absent: number } | null>(null);
 
-  const fetchTotals = async (m?: number, y?: number) => {
+  const fetchTotals = useCallback(async (m?: number, y?: number) => {
     try {
       const res = await fetch(`/api/attendance/total?month=${m ?? month}&year=${y ?? year}`);
       if (!res.ok) return;
@@ -37,7 +37,7 @@ const AttendanceChartContainer = () => {
     } catch (e) {
       // ignore
     }
-  };
+  }, [month, year]);
 
   useEffect(() => {
     fetchData();
@@ -54,7 +54,7 @@ const AttendanceChartContainer = () => {
     return () => {
       es.close();
     };
-  }, []);
+  }, [fetchData, fetchTotals]);
 
   return (
     <div className="bg-white rounded-lg p-4 h-full">

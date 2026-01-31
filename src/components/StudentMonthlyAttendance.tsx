@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 
 type Row = { date: string; present: boolean; lessonName?: string | null };
 
@@ -11,24 +11,23 @@ export default function StudentMonthlyAttendance({ id, month, year }: { id: stri
   const [data, setData] = useState<Row[] | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const fetchData = async (mm: number, yy: number) => {
+  const fetchData = useCallback(async (mm: number, yy: number) => {
     setLoading(true);
     const res = await fetch(`/api/attendance/student?studentId=${encodeURIComponent(id)}&month=${mm}&year=${yy}`);
     const json = await res.json();
     setData(json.data || []);
     setLoading(false);
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchData(m, y);
-  }, [m, y, id]);
+  }, [fetchData, m, y]);
 
   // poll for updates so students see marks shortly after teachers submit
   useEffect(() => {
     const interval = setInterval(() => fetchData(m, y), 10000); // every 10s
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [m, y, id]);
+  }, [fetchData, m, y]);
 
   // real-time updates via SSE: refresh when an attendance event for this student arrives
   useEffect(() => {
@@ -52,8 +51,7 @@ export default function StudentMonthlyAttendance({ id, month, year }: { id: stri
     return () => {
       if (es) es.close();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, m, y]);
+  }, [fetchData, m, y, id]);
 
   const daysInMonth = useMemo(() => new Date(y, m, 0).getDate(), [m, y]);
 

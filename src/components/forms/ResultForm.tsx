@@ -9,6 +9,16 @@ import { useEffect, Dispatch, SetStateAction, useState } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
+type MarkField = {
+  id?: string;
+  resultId?: string | null;
+  subjectId?: string;
+  newSubjectName?: string;
+  score?: string;
+  total?: string;
+  grade?: string;
+};
+
 const ResultForm = ({ type, data, setOpen, relatedData }: { type: "create" | "update"; data?: any; setOpen: Dispatch<SetStateAction<boolean>>; relatedData?: any }) => {
   // normalize incoming marks so select/default inputs receive strings and DB ids are preserved
   const normalizedMarks = (data?.marks ?? [{ subjectId: "", newSubjectName: "", score: "", total: "", grade: "" }]).map((m: any) => ({
@@ -31,7 +41,7 @@ const ResultForm = ({ type, data, setOpen, relatedData }: { type: "create" | "up
     },
   });
 
-  const { fields, append, remove } = useFieldArray({ control, name: "marks" });
+  const { fields, append, remove } = useFieldArray<{ marks: MarkField[] }, "marks">({ control, name: "marks" });
 
   const [state, formAction] = useFormState(type === "create" ? createResult : updateResult, { success: false, error: false });
   const router = useRouter();
@@ -60,7 +70,8 @@ const ResultForm = ({ type, data, setOpen, relatedData }: { type: "create" | "up
     if (!Array.isArray(marks) || marks.length === 0) return setClientError("Add at least one subject mark");
 
     // validate marks
-    for (const [i, m] of marks.entries()) {
+    for (let i = 0; i < marks.length; i++) {
+      const m = marks[i];
       const score = Number(m.score ?? "");
       const total = Number(m.total ?? "");
       if (Number.isNaN(score) || Number.isNaN(total)) return setClientError(`Row ${i + 1}: score and total must be numbers`);
@@ -204,9 +215,9 @@ const ResultForm = ({ type, data, setOpen, relatedData }: { type: "create" | "up
             {fields.map((f, idx) => (
               <div key={f.id} className="grid grid-cols-12 gap-2 items-end">
                 {/* preserve DB id so updateResult can target the correct rows (stored as resultId) */}
-                <input type="hidden" {...register(`marks.${idx}.resultId`)} defaultValue={f.resultId ?? ""} />
+                    <input type="hidden" {...register(`marks.${idx}.resultId`)} defaultValue={(f as any).resultId ?? ""} />
                 <div className="col-span-5">
-                  <select className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" {...register(`marks.${idx}.subjectId`)} defaultValue={String(f.subjectId ?? "")} onChange={(e) => setAddingSubject(e.target.value === "__new") }>
+                  <select className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" {...register(`marks.${idx}.subjectId`)} defaultValue={String((f as any).subjectId ?? "")} onChange={(e) => setAddingSubject(e.target.value === "__new") }>
                     <option value="">-- select subject --</option>
                     {subjects.map((s: any) => (
                       <option key={s.id} value={s.id}>{s.name}</option>
@@ -214,22 +225,22 @@ const ResultForm = ({ type, data, setOpen, relatedData }: { type: "create" | "up
                     <option value="__new">+ Add new...</option>
                   </select>
                   {watch(`marks.${idx}.subjectId`) === "__new" && (
-                    <InputField label="New subject name" name={`marks.${idx}.newSubjectName`} defaultValue={""} register={register} error={errors?.marks?.[idx]?.newSubjectName} />
+                    <InputField label="New subject name" name={`marks.${idx}.newSubjectName`} defaultValue={""} register={register} error={(errors as any)?.marks?.[idx]?.newSubjectName} />
                   )}
                 </div>
                 <div className="col-span-2">
-                  <InputField label="Score" name={`marks.${idx}.score`} defaultValue={f.score} register={register} error={errors?.marks?.[idx]?.score} />
+                  <InputField label="Score" name={`marks.${idx}.score`} defaultValue={(f as any).score} register={register} error={(errors as any)?.marks?.[idx]?.score} />
                 </div>
                 <div className="col-span-2">
-                  <InputField label="Total" name={`marks.${idx}.total`} defaultValue={f.total} register={register} error={errors?.marks?.[idx]?.total} />
+                  <InputField label="Total" name={`marks.${idx}.total`} defaultValue={(f as any).total} register={register} error={(errors as any)?.marks?.[idx]?.total} />
                 </div>
                 <div className="col-span-2 text-sm text-gray-600">
-                  <input className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full mb-1" placeholder="Grade (opt)" {...register(`marks.${idx}.grade`)} defaultValue={f.grade || ""} />
+                  <input className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full mb-1" placeholder="Grade (opt)" {...register(`marks.${idx}.grade`)} defaultValue={(f as any).grade || ""} />
                   {/* per-row percent shown below grade for compact layout */}
                   {/* per-row percent */}
                   {(() => {
-                    const s = Number(watch(`marks.${idx}.score`) ?? f.score ?? 0);
-                    const t = Number(watch(`marks.${idx}.total`) ?? f.total ?? 0);
+                    const s = Number(watch(`marks.${idx}.score`) ?? (f as any).score ?? 0);
+                    const t = Number(watch(`marks.${idx}.total`) ?? (f as any).total ?? 0);
                     if (t > 0) {
                       const p = Math.round((s / t) * 100);
                       const g = p >= 80 ? "A+" : p >= 70 ? "A" : p >= 60 ? "B" : p >= 50 ? "C" : p >= 40 ? "D" : "F";

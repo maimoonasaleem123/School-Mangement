@@ -114,9 +114,8 @@ const SingleStudentPage = async ({ params: { id } }: { params: { id: string } })
       </div>
       <div className="mt-6">
         {/* Client component: StudentFees */}
-        {/* @ts-expect-error Server->Client import */}
-        {/* eslint-disable-next-line react/jsx-no-undef */}
-        {/* We'll import dynamically in the client via component file usage in layout */}
+          {/* eslint-disable-next-line react/jsx-no-undef */}
+          {/* We'll import dynamically in the client via component file usage in layout */}
       </div>
     </div>
   );
