@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import dynamic from "next/dynamic";
+import type { Student } from "@prisma/client";
 
 const TeacherAttendanceRow = dynamic(() => import("@/components/TeacherAttendanceRow"), { ssr: false });
 import { auth } from "@clerk/nextjs/server";
@@ -98,10 +99,9 @@ const AttendanceListPage = async ({
               </div>
 
               <div className="mt-4 grid grid-cols-1 md:grid-cols-1 gap-2">
-                {lesson.class.students.map((student) => (
+                {lesson.class.students.map((student: Student) => (
                   <div key={student.id} className="p-2 border rounded">
                     {/* render client row to handle marking via API */}
-                    {/* @ts-ignore */}
                     <TeacherAttendanceRow student={student} lessonId={lesson.id} date={selectedDate} />
                   </div>
                 ))}
@@ -123,7 +123,7 @@ const AttendanceListPage = async ({
               </div>
 
               <div className="mt-4 grid grid-cols-1 md:grid-cols-1 gap-2">
-                {c.students.map((student) => (
+                {c.students.map((student: Student) => (
                   <div key={student.id} className="p-2 border rounded flex items-center justify-between">
                     <div>
                       <div className="font-medium">{student.name} {student.surname}</div>
